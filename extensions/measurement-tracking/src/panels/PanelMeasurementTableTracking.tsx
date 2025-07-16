@@ -9,7 +9,7 @@ import {
   StudyMeasurementsActions,
   MeasurementsOrAdditionalFindings,
 } from '@ohif/extension-cornerstone';
-
+import i18n from 'i18next';
 import { useTrackedMeasurements } from '../getContextModule';
 import { UntrackSeriesModal } from './PanelStudyBrowserTracking/untrackSeriesModal';
 
@@ -37,11 +37,11 @@ function PanelMeasurementTableTracking(props) {
       .some(measurement => measurement.isDirty);
     hasDirtyMeasurements
       ? uiModalService.show({
-          title: 'Untrack Study',
+          title: i18n.t('AboutModal:Untrack Study'),
           content: UntrackSeriesModal,
           contentProps: {
             onConfirm: onUntrackConfirm,
-            message: 'Are you sure you want to untrack study and delete all measurements?',
+            message: i18n.t('AboutModal:Are you sure you want to untrack study and delete all measurements?'),
           },
         })
       : onUntrackConfirm();

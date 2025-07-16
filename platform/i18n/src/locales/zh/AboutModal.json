@@ -1,1 +1,7 @@
-{}
+{
+    "Untrack Study": "取消追踪",
+    "Cancel": "取消",
+    "Confirm": "确定",
+    "Are you sure you want to untrack study and delete all measurements?":"您确定要取消追踪此研究并删除所有测量数据吗？",
+    "This action cannot be undone and will delete all your existing measurements.":"此操作无法撤销，并将删除您现有的所有测量数据。"
+}
