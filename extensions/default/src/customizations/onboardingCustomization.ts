@@ -23,8 +23,8 @@ export default {
       steps: [
         {
           id: 'scroll',
-          title: 'Scrolling Through Images',
-          text: 'You can scroll through the images using the mouse wheel or scrollbar.',
+          title: '浏览图像',
+          text: '您可以使用鼠标滚轮或滚动条来浏览图像。',
           attachTo: {
             element: '.viewport-element',
             on: 'top',
@@ -37,8 +37,8 @@ export default {
         },
         {
           id: 'zoom',
-          title: 'Zooming In and Out',
-          text: 'You can zoom the images using the right click.',
+          title: '缩放图像',
+          text: '您可以使用右键点击来缩放图像。',
           attachTo: {
             element: '.viewport-element',
             on: 'left',
@@ -51,8 +51,8 @@ export default {
         },
         {
           id: 'pan',
-          title: 'Panning the Image',
-          text: 'You can pan the images using the middle click.',
+          title: '平移图像',
+          text: '您可以使用中键点击来平移图像。',
           attachTo: {
             element: '.viewport-element',
             on: 'top',
@@ -65,8 +65,8 @@ export default {
         },
         {
           id: 'windowing',
-          title: 'Adjusting Window Level',
-          text: 'You can modify the window level using the left click.',
+          title: '调整窗位',
+          text: '您可以使用左键点击来调整窗位。',
           attachTo: {
             element: '.viewport-element',
             on: 'left',
@@ -79,8 +79,8 @@ export default {
         },
         {
           id: 'length',
-          title: 'Using the Measurement Tools',
-          text: 'You can measure the length of a region using the Length tool.',
+          title: '使用测量工具',
+          text: '您可以使用“长度”工具来测量一个区域的长度。',
           attachTo: {
             element: '[data-cy="MeasurementTools-split-button-primary"]',
             on: 'bottom',
@@ -90,12 +90,12 @@ export default {
             event: 'click',
           },
           beforeShowPromise: () =>
-            waitForElement('[data-cy="MeasurementTools-split-button-primary]'),
+            waitForElement('[data-cy="MeasurementTools-split-button-primary"]'),
         },
         {
           id: 'drawAnnotation',
-          title: 'Drawing Length Annotations',
-          text: 'Use the length tool on the viewport to measure the length of a region.',
+          title: '绘制长度标注',
+          text: '在视图中使用长度工具来测量区域的长度。',
           attachTo: {
             element: '.viewport-element',
             on: 'right',
@@ -108,8 +108,8 @@ export default {
         },
         {
           id: 'trackMeasurement',
-          title: 'Tracking Measurements in the Panel',
-          text: 'Click yes to track the measurements in the measurement panel.',
+          title: '在面板中跟踪测量',
+          text: '点击“是”以在测量面板中跟踪测量。',
           attachTo: {
             element: '[data-cy="prompt-begin-tracking-yes-btn"]',
             on: 'bottom',
@@ -122,8 +122,8 @@ export default {
         },
         {
           id: 'openMeasurementPanel',
-          title: 'Opening the Measurements Panel',
-          text: 'Click the measurements button to open the measurements panel.',
+          title: '打开测量面板',
+          text: '点击测量按钮以打开测量面板。',
           attachTo: {
             element: '#trackedMeasurements-btn',
             on: 'left-start',
@@ -136,8 +136,8 @@ export default {
         },
         {
           id: 'scrollAwayFromMeasurement',
-          title: 'Scrolling Away from a Measurement',
-          text: 'Scroll the images using the mouse wheel away from the measurement.',
+          title: '滚动离开测量',
+          text: '使用鼠标滚轮滚动图像，远离测量区域。',
           attachTo: {
             element: '.viewport-element',
             on: 'left',
@@ -150,8 +150,8 @@ export default {
         },
         {
           id: 'jumpToMeasurement',
-          title: 'Jumping to Measurements in the Panel',
-          text: 'Click the measurement in the measurement panel to jump to it.',
+          title: '跳转到测量区域',
+          text: '点击测量面板中的测量数据跳转到该区域。',
           attachTo: {
             element: '[data-cy="data-row"]',
             on: 'left-start',
@@ -164,8 +164,8 @@ export default {
         },
         {
           id: 'changeLayout',
-          title: 'Changing Layout',
-          text: 'You can change the layout of the viewer using the layout button.',
+          title: '更改布局',
+          text: '您可以使用布局按钮更改查看器的布局。',
           attachTo: {
             element: '[data-cy="Layout"]',
             on: 'bottom',
@@ -178,8 +178,8 @@ export default {
         },
         {
           id: 'selectLayout',
-          title: 'Selecting the MPR Layout',
-          text: 'Select the MPR layout to view the images in MPR mode.',
+          title: '选择MPR布局',
+          text: '选择MPR布局以在MPR模式下查看图像。',
           attachTo: {
             element: '[data-cy="MPR"]',
             on: 'left-start',

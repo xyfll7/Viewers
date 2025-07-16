@@ -6,7 +6,7 @@ import { offset, flip, shift, detectOverflow } from '@floating-ui/dom';
  * @returns {string[]} An array of tour IDs that have been shown.
  */
 
-const getShownTours = () => JSON.parse(localStorage.getItem('shownTours')) || [];
+const getShownTours = () => JSON.parse(localStorage.getItem('shownTours')) || ["basicViewerTour"];
 
 /**
  * Checks if a specific tour has been shown.
