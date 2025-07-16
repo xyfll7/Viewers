@@ -87,15 +87,17 @@ function Header({
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
             <div className="flex-shrink-0">
               <DropdownMenu>
-                {/* <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-primary hover:bg-primary-dark mt-2 h-full w-full"
-                  >
-                    <Icons.GearSettings />
-                  </Button>
-                </DropdownMenuTrigger> */}
+                {process.env.NODE_ENV === 'development' && (
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-primary hover:bg-primary-dark mt-2 h-full w-full"
+                    >
+                      <Icons.GearSettings />
+                    </Button>
+                  </DropdownMenuTrigger>
+                )}
                 <DropdownMenuContent align="end">
                   {menuOptions.map((option, index) => {
                     const IconComponent = option.icon
