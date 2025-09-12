@@ -40,6 +40,8 @@ import { updateSegmentBidirectionalStats } from './utils/updateSegmentationStats
 import { generateSegmentationCSVReport } from './utils/generateSegmentationCSVReport';
 import { getUpdatedViewportsForSegmentation } from './utils/hydrationUtils';
 import { SegmentationRepresentations } from '@cornerstonejs/tools/enums';
+import { isMeasurementWithinViewport } from './utils/isMeasurementWithinViewport';
+import { getCenterExtent } from './utils/getCenterExtent';
 
 const { DefaultHistoryMemo } = csUtils.HistoryMemo;
 const toggleSyncFunctions = {
@@ -58,10 +60,7 @@ const getLabelmapTools = ({ toolGroupService }) => {
     // tools is an object with toolName as the key and tool as the value
     Object.keys(tools).forEach(toolName => {
       const tool = tools[toolName];
-      if (
-        tool instanceof cornerstoneTools.LabelmapBaseTool &&
-        tool.shouldResolvePreviewRequests()
-      ) {
+      if (tool instanceof cornerstoneTools.LabelmapBaseTool) {
         labelmapTools.push(tool);
       }
     });
@@ -102,6 +101,7 @@ let segmentAIEnabled = false;
 function commandsModule({
   servicesManager,
   commandsManager,
+  extensionManager,
 }: OhifTypes.Extensions.ExtensionParams): OhifTypes.Extensions.CommandsModule {
   const {
     viewportGridService,
@@ -145,6 +145,91 @@ function commandsModule({
   }
 
   const actions = {
+    jumpToMeasurementViewport: ({ annotationUID, measurement }) => {
+      cornerstoneTools.annotation.selection.setAnnotationSelected(annotationUID, true);
+      const { metadata } = measurement;
+
+      const activeViewportId = viewportGridService.getActiveViewportId();
+      // Finds the best viewport to jump to for showing the annotation view reference
+      // This may be different from active if there is a viewport already showing the display set.
+      const viewportId = cornerstoneViewportService.findNavigationCompatibleViewportId(
+        activeViewportId,
+        metadata
+      );
+      if (viewportId) {
+        const viewport = cornerstoneViewportService.getCornerstoneViewport(viewportId);
+        viewport.setViewReference(metadata);
+        viewport.render();
+
+        /**
+         * If the measurement is not visible inside the current viewport,
+         * we need to move the camera to the measurement.
+         */
+        if (!isMeasurementWithinViewport(viewport, measurement)) {
+          const camera = viewport.getCamera();
+          const { focalPoint: cameraFocalPoint, position: cameraPosition } = camera;
+          const { center, extent } = getCenterExtent(measurement);
+          const position = vec3.sub(vec3.create(), cameraPosition, cameraFocalPoint);
+          vec3.add(position, position, center);
+          viewport.setCamera({ focalPoint: center, position: position as any });
+          /** Zoom out if the measurement is too large */
+          const measurementSize = vec3.dist(extent.min, extent.max);
+          if (measurementSize > camera.parallelScale) {
+            const scaleFactor = measurementSize / camera.parallelScale;
+            viewport.setZoom(viewport.getZoom() / scaleFactor);
+          }
+          viewport.render();
+        }
+
+        return;
+      }
+
+      const { displaySetInstanceUID: referencedDisplaySetInstanceUID } = measurement;
+      if (!referencedDisplaySetInstanceUID) {
+        console.warn('ViewportGrid::No display set found in', measurement);
+        return;
+      }
+
+      // Finds the viewport to update to show the given displayset/orientation.
+      // This will choose a view already containing the measurement display set
+      // if possible, otherwise will fallback to the active.
+      const viewportToUpdate = cornerstoneViewportService.findUpdateableViewportConfiguration(
+        activeViewportId,
+        measurement
+      );
+
+      if (!viewportToUpdate) {
+        console.warn('Unable to find a viewport to show this in');
+        return;
+      }
+      const updatedViewports = hangingProtocolService.getViewportsRequireUpdate(
+        viewportToUpdate.viewportId,
+        referencedDisplaySetInstanceUID
+      );
+
+      if (!updatedViewports?.[0]) {
+        console.warn(
+          'ViewportGrid::Unable to navigate to viewport containing',
+          referencedDisplaySetInstanceUID
+        );
+        return;
+      }
+
+      updatedViewports[0].viewportOptions = viewportToUpdate.viewportOptions;
+
+      // Update stored position presentation
+      commandsManager.run('updateStoredPositionPresentation', {
+        viewportId: viewportToUpdate.viewportId,
+        displaySetInstanceUIDs: [referencedDisplaySetInstanceUID],
+        referencedImageId: measurement.referencedImageId,
+        options: {
+          ...measurement.metadata,
+        },
+      });
+
+      commandsManager.run('setDisplaySetsForViewports', { viewportsToUpdate: updatedViewports });
+    },
+
     hydrateSecondaryDisplaySet: async ({ displaySet, viewportId }) => {
       if (!displaySet) {
         return;
@@ -327,6 +412,8 @@ function commandsModule({
         type,
       });
     },
+
+    /** Stores the changed position presentation */
     updateStoredPositionPresentation: ({
       viewportId,
       displaySetInstanceUIDs,
@@ -350,22 +437,23 @@ function commandsModule({
           ([key, value]) => {
             return (
               displaySetInstanceUIDs.every(uid => key.includes(uid)) &&
-              value.viewportId === viewportId
+              value?.viewportId === viewportId
             );
           }
         )?.[0];
       }
 
       // Create presentation data with referencedImageId and options if provided
-      const presentationData = referencedImageId
-        ? {
-            ...presentations.positionPresentation,
-            viewReference: {
-              referencedImageId,
-              ...options,
-            },
-          }
-        : presentations.positionPresentation;
+      const presentationData =
+        referencedImageId || options?.FrameOfReferenceUID
+          ? {
+              ...presentations.positionPresentation,
+              viewReference: {
+                referencedImageId,
+                ...options,
+              },
+            }
+          : presentations.positionPresentation;
 
       if (previousReferencedDisplaySetStoreKey) {
         setPositionPresentation(previousReferencedDisplaySetStoreKey, presentationData);
@@ -640,9 +728,21 @@ function commandsModule({
 
       viewportGridService.setActiveViewportId(viewportId);
     },
-    arrowTextCallback: async ({ callback }) => {
+    arrowTextCallback: async ({ callback, data }) => {
       const labelConfig = customizationService.getCustomization('measurementLabels');
       const renderContent = customizationService.getCustomization('ui.labellingComponent');
+
+      if (!labelConfig) {
+        const label = await callInputDialog({
+          uiDialogService,
+          title: 'Edit Arrow Text',
+          placeholder: data?.data?.label || 'Enter new text',
+          defaultValue: data?.data?.label || '',
+        });
+
+        callback?.(label);
+        return;
+      }
 
       const value = await callInputDialogAutoComplete({
         uiDialogService,
@@ -1734,16 +1834,61 @@ function commandsModule({
         }
       });
     },
-    toggleSegmentLabel: ({ toggle }) => {
+    toggleSegmentLabel: () => {
+      const toolName = cornerstoneTools.SegmentLabelTool.toolName;
       const toolGroupIds = toolGroupService.getToolGroupIds();
+
+      const isOn = toolGroupIds.some(toolGroupId => {
+        const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(toolGroupId);
+        const mode = toolGroup.getToolInstance(toolName)?.mode;
+        return mode === 'Active';
+      });
+
       toolGroupIds.forEach(toolGroupId => {
         const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroup(toolGroupId);
-        if (toggle) {
-          toolGroup.setToolActive(cornerstoneTools.SegmentLabelTool.toolName);
+        if (isOn) {
+          toolGroup.setToolDisabled(toolName);
         } else {
-          toolGroup.setToolDisabled(cornerstoneTools.SegmentLabelTool.toolName);
+          toolGroup.setToolActive(toolName);
         }
       });
+    },
+    /**
+     * Used to sync the apps initial state with the config file settings.
+     *
+     * Will mutate the tools object of the given tool group and add the segmentLabelTool to the proper place.
+     *
+     * Use it before initializing the toolGroup with the tools.
+     */
+    initializeSegmentLabelTool: ({ tools }) => {
+      const appConfig = extensionManager.appConfig;
+      const segmentLabelConfig = appConfig.segmentation?.segmentLabel;
+
+      if (segmentLabelConfig?.enabledByDefault) {
+        const activeTools = tools?.active ?? [];
+        activeTools.push({
+          toolName: toolNames.SegmentLabel,
+          configuration: {
+            hoverTimeout: segmentLabelConfig?.hoverTimeout ?? 1,
+            color: segmentLabelConfig?.labelColor,
+            background: segmentLabelConfig?.background,
+          },
+        });
+
+        tools.active = activeTools;
+        return tools;
+      }
+
+      const disabledTools = tools?.disabled ?? [];
+      disabledTools.push({
+        toolName: toolNames.SegmentLabel,
+        configuration: {
+          hoverTimeout: segmentLabelConfig?.hoverTimeout ?? 1,
+          color: segmentLabelConfig?.labelColor,
+        },
+      });
+      tools.disabled = disabledTools;
+      return tools;
     },
     toggleUseCenterSegmentIndex: ({ toggle }) => {
       let labelmapTools = getLabelmapTools({ toolGroupService });
@@ -2098,9 +2243,7 @@ function commandsModule({
     updateMeasurement: {
       commandFn: actions.updateMeasurement,
     },
-    jumpToMeasurement: {
-      commandFn: actions.jumpToMeasurement,
-    },
+    jumpToMeasurement: actions.jumpToMeasurement,
     removeMeasurement: {
       commandFn: actions.removeMeasurement,
     },
@@ -2363,6 +2506,8 @@ function commandsModule({
     startRecordingForAnnotationGroup: actions.startRecordingForAnnotationGroup,
     endRecordingForAnnotationGroup: actions.endRecordingForAnnotationGroup,
     toggleSegmentLabel: actions.toggleSegmentLabel,
+    jumpToMeasurementViewport: actions.jumpToMeasurementViewport,
+    initializeSegmentLabelTool: actions.initializeSegmentLabelTool,
   };
 
   return {

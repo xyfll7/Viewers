@@ -295,6 +295,7 @@ export const DataRow: React.FC<DataRowProps> = ({
                       : 'opacity-0 group-hover:opacity-100'
                   }`}
                   aria-label="Actions"
+                  dataCY="actionsMenuTrigger"
                   onClick={e => e.stopPropagation()} // Prevent row selection on button click
                 >
                   <Icons.More className="h-6 w-6" />
@@ -306,23 +307,43 @@ export const DataRow: React.FC<DataRowProps> = ({
                 onCloseAutoFocus={e => e.preventDefault()}
               >
                 <>
-                  <DropdownMenuItem onClick={e => handleAction('Rename', e)}>
+                  <DropdownMenuItem onClick={e => handleAction('Delete', e)}>
                     <Icons.Rename className="text-foreground" />
-                    <span className="pl-2">重命名</span>
+                    <span
+                      className="pl-2"
+                      data-cy="Rename"
+                    >
+                      重命名
+                    </span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={e => handleAction('Delete', e)}>
                     <Icons.Delete className="text-foreground" />
-                    <span className="pl-2">删除</span>
+                    <span
+                      className="pl-2"
+                      data-cy="Delete"
+                    >
+                      删除
+                    </span>
                   </DropdownMenuItem>
                   {onColor && (
                     <DropdownMenuItem onClick={e => handleAction('Color', e)}>
                       <Icons.ColorChange className="text-foreground" />
-                      <span className="pl-2">修改颜色</span>
+                      <span
+                        className="pl-2"
+                        data-cy="Change Color"
+                      >
+                        修改颜色
+                      </span>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={e => handleAction('Lock7', e)}>
                     <Icons.Lock className="text-foreground" />
-                    <span className="pl-2">{isLocked ? '解锁' : '锁定'}</span>
+                    <span
+                      className="pl-2"
+                      data-cy="LockToggle"
+                    >
+                      {isLocked ? '解锁' : '锁定'}
+                    </span>
                   </DropdownMenuItem>
                 </>
               </DropdownMenuContent>

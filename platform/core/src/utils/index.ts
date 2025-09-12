@@ -45,6 +45,7 @@ import { sopClassDictionary } from './sopClassDictionary';
 import * as MeasurementFilters from './measurementFilters';
 import getClosestOrientationFromIOP from './getClosestOrientationFromIOP';
 import calculateScanAxisNormal from './calculateScanAxisNormal';
+import areAllImageOrientationsEqual from './areAllImageOrientationsEqual';
 // Commented out unused functionality.
 // Need to implement new mechanism for derived displaySets using the displaySetManager.
 
@@ -95,6 +96,7 @@ const utils = {
   MeasurementFilters,
   getClosestOrientationFromIOP,
   calculateScanAxisNormal,
+  areAllImageOrientationsEqual,
 };
 
 export {
