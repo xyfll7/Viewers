@@ -53,15 +53,15 @@ function _askTrackMeasurements(
       'viewportNotification.trackNewStudyMessage'
     );
     const actions = [
-      { type: 'cancel', text: i18n.t('MeasurementTable:No'), value: RESPONSE.CANCEL },
+      { type: 'cancel', text: i18n.t('MeasurementTable:否'), value: RESPONSE.CANCEL },
       {
         type: 'secondary',
-        text: i18n.t('MeasurementTable:No, do not ask again'),
+        text: i18n.t('MeasurementTable:请勿再次询问'),
         value: RESPONSE.NO_NOT_FOR_SERIES,
       },
       {
         type: 'primary',
-        text: i18n.t('MeasurementTable:Yes'),
+        text: i18n.t('MeasurementTable:是'),
         value: RESPONSE.SET_STUDY_AND_SERIES,
       },
     ];
