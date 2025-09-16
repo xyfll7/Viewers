@@ -46,7 +46,7 @@ export function StudyMeasurementsActions({ items, StudyInstanceUID, measurementF
           <Icons.Add />
           创建结构化报告
         </Button>
-        <Button
+        {/* <Button
           size="sm"
           variant="ghost"
           className="pl-1.5"
@@ -59,7 +59,7 @@ export function StudyMeasurementsActions({ items, StudyInstanceUID, measurementF
         >
           <Icons.Upload className="h-5 w-5" />
           <span className="pl-1">提交</span>
-        </Button>
+        </Button> */}
         <Button
           size="sm"
           variant="ghost"
