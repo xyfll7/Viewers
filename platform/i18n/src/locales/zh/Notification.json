@@ -1,7 +1,7 @@
 {
-  "Do you want to add this measurement to the existing report?": "添加测量值到当前报告中？",
+  "Do you want to add this measurement to the existing report?": "您是否要将此测量结果添加到现有报告中？",
   "Create new report": "创建新报告",
-  "Add to existing report": "添加",
+  "Add to existing report": "添加到现有报告",
   "Discard": "放弃",
   "You have existing tracked measurements. What would you like to do with your existing tracked measurements?": "已经存在跟踪的测量，如何处理这些测量数据？",
   "No, do not ask again for this series": "否，不再询问",

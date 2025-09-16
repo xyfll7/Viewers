@@ -11,6 +11,6 @@
   "No tracked measurements": "没有跟踪的测量值",
   "Export": "导出",
   "Create Report": "新建报告",
-  "Do you want to add this measurement to the existing report?": "将测量添加到报告中？",
+  "Do you want to add this measurement to the existing report?": "您是否要将此测量结果添加到现有报告中？",
   "Track measurements for this series?": "要对个序列进行跟踪吗？"
 }

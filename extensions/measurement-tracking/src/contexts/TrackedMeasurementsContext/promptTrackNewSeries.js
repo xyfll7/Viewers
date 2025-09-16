@@ -47,17 +47,17 @@ function _askShouldAddMeasurements(uiViewportDialogService, customizationService
     const actions = [
       {
         type: 'secondary',
-        text: 'Cancel',
+        text: '取消',
         value: RESPONSE.CANCEL,
       },
       {
         type: 'primary',
-        text: 'Create new report',
+        text: '创建新报告',
         value: RESPONSE.CREATE_REPORT,
       },
       {
         type: 'primary',
-        text: 'Add to existing report',
+        text: '添加到现有报告',
         value: RESPONSE.ADD_SERIES,
       },
     ];
