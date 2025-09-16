@@ -1,12 +1,12 @@
 import i18n from '@ohif/i18n';
 import { ViewportDialog } from '@ohif/ui-next';
 
-const beginTrackingMessage = i18n.t('MeasurementTable:Track measurements for this series?');
+const beginTrackingMessage = i18n.t('MeasurementTable:要对个序列进行跟踪吗？');
 const trackNewSeriesMessage = i18n.t('Do you want to add this measurement to the existing report?');
 const discardSeriesMessage = i18n.t(
   'You have existing tracked measurements. What would you like to do with your existing tracked measurements?'
 );
-const trackNewStudyMessage = i18n.t('MeasurementTable:Track measurements for this series?');
+const trackNewStudyMessage = i18n.t('MeasurementTable:要对个序列进行跟踪吗？');
 const discardStudyMessage = i18n.t(
   'Measurements cannot span across multiple studies. Do you want to save your tracked measurements?'
 );
