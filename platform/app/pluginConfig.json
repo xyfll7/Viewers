@@ -75,6 +75,9 @@
       "packageName": "@ohif/mode-segmentation"
     },
     {
+      "packageName": "@ohif/my-viewer-seg"
+    },
+    {
       "packageName": "@ohif/mode-tmtv"
     },
     {
