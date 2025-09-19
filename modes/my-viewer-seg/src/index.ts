@@ -17,7 +17,7 @@ const ohif = {
 
 const cornerstone = {
   measurements: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
-  segmentation: '@ohif/extension-cornerstone.panelModule.panelSegmentation',
+  segmentation: '@ohif/extension-cornerstone.panelModule.panelSegmentationWithTools',
 };
 
 const tracked = {
@@ -57,6 +57,11 @@ const dicomRT = {
   sopClassHandler: '@ohif/extension-cornerstone-dicom-rt.sopClassHandlerModule.dicom-rt',
 };
 
+const segmentation = {
+  sopClassHandler: '@ohif/extension-cornerstone-dicom-seg.sopClassHandlerModule.dicom-seg',
+  viewport: '@ohif/extension-cornerstone-dicom-seg.viewportModule.dicom-seg',
+};
+
 const extensionDependencies = {
   // Can derive the versions at least process.env.from npm_package_version
   '@ohif/extension-default': '^3.0.0',
@@ -76,12 +81,12 @@ function modeFactory({ modeConfiguration }) {
     // TODO: We're using this as a route segment
     // We should not be.
     id,
-    routeName: 'viewer',
-    displayName: i18n.t('Modes:Basic Viewer'),
+    routeName: 'viewer-seg',
+    displayName: i18n.t('Modes:My Viewer Seg'),
     /**
      * Lifecycle hooks
      */
-    onModeEnter: function ({ servicesManager, extensionManager, commandsManager }: withAppTypes) {
+    onModeEnter: function ({ servicesManager, extensionManager, commandsManager }) {
       const { measurementService, toolbarService, toolGroupService, customizationService } =
         servicesManager.services;
 
@@ -164,9 +169,31 @@ function modeFactory({ modeConfiguration }) {
         'SegmentLabelTool',
       ]);
 
+      // Add segmentation toolbox sections
+      toolbarService.updateSection(toolbarService.sections.segmentationToolbox, [
+        'SegmentationUtilities',
+        'SegmentationTools',
+      ]);
+      
+      toolbarService.updateSection('SegmentationUtilities', [
+        'LabelmapSlicePropagation',
+        'InterpolateLabelmap',
+        'SegmentBidirectional',
+        'SegmentLabelTool',
+      ]);
+      
+      toolbarService.updateSection('SegmentationTools', [
+        'BrushTools',
+        'MarkerLabelmap',
+        'RegionSegmentPlus',
+        'Shapes',
+      ]);
+      
+      toolbarService.updateSection('BrushTools', ['Brush', 'Eraser', 'Threshold']);
+
       customizationService.setCustomizations({
         'panelSegmentation.disableEditing': {
-          $set: true,
+          $set: false, // Enable editing for segmentation
         },
       });
 
@@ -199,7 +226,7 @@ function modeFactory({ modeConfiguration }) {
       //   true,
       // ];
     },
-    onModeExit: ({ servicesManager }: withAppTypes) => {
+    onModeExit: ({ servicesManager }) => {
       const {
         toolGroupService,
         syncGroupService,
@@ -279,6 +306,10 @@ function modeFactory({ modeConfiguration }) {
                   namespace: dicomRT.viewport,
                   displaySetsToDisplay: [dicomRT.sopClassHandler],
                 },
+                {
+                  namespace: segmentation.viewport,
+                  displaySetsToDisplay: [segmentation.sopClassHandler],
+                },
               ],
             },
           };
@@ -302,6 +333,7 @@ function modeFactory({ modeConfiguration }) {
       dicomsr.sopClassHandler3D,
       dicomsr.sopClassHandler,
       dicomRT.sopClassHandler,
+      segmentation.sopClassHandler,
     ],
     ...modeConfiguration,
   };
