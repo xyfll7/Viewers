@@ -1,9 +1,11 @@
 import React from 'react';
 import { Button, Icons } from '@ohif/ui-next';
 import { useSystem } from '@ohif/core';
+import { useTranslation } from 'react-i18next';
 
 export function StudyMeasurementsActions({ items, StudyInstanceUID, measurementFilter, actions }) {
   const { commandsManager } = useSystem();
+  const { t } = useTranslation('MeasurementTable');
   const disabled = !items?.length;
 
   if (disabled) {
@@ -44,21 +46,7 @@ export function StudyMeasurementsActions({ items, StudyInstanceUID, measurementF
           }}
         >
           <Icons.Add />
-          创建结构化报告
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="pl-1.5"
-          onClick={() => {
-            commandsManager.runCommand('uploadDATAMeasurementsReport', {
-              StudyInstanceUID,
-              measurementFilter,
-            });
-          }}
-        >
-          <Icons.Upload className="h-5 w-5" />
-          <span className="pl-1">提交</span>
+          {t('Create SR')}
         </Button>
         <Button
           size="sm"
@@ -76,7 +64,7 @@ export function StudyMeasurementsActions({ items, StudyInstanceUID, measurementF
           }}
         >
           <Icons.Delete />
-          删除全部
+          {t('Delete')}
         </Button>
       </div>
     </div>
