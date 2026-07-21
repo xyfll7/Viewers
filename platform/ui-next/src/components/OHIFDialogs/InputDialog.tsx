@@ -1,6 +1,21 @@
 import React, { createContext, useContext, useRef, useEffect } from 'react';
 import { useControllableState } from '@radix-ui/react-use-controllable-state';
-import { Label, Input as InputComponent, FooterAction } from '../../components';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import {
+  Label,
+  Input as InputComponent,
+  FooterAction,
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Command,
+  CommandInput,
+  CommandEmpty,
+  CommandList,
+  CommandGroup,
+  CommandItem,
+} from '../../components';
 import { cn } from '../../lib/utils';
 
 interface InputDialogContextValue {
@@ -249,9 +264,137 @@ const ActionsPrimary = React.forwardRef<HTMLDivElement, InputDialogActionButtonP
 
 ActionsPrimary.displayName = 'InputDialog.ActionsPrimary';
 
+export interface InputDialogComboboxOption {
+  /** The value stored in the dialog when this option is selected */
+  value: string;
+  /** The human-readable label shown in the list and trigger */
+  label: string;
+}
+
+export interface InputDialogComboboxProps {
+  /** Options to display in the combobox */
+  data?: InputDialogComboboxOption[];
+  /** Placeholder text shown when no option is selected */
+  placeholder?: string;
+  /** Optional className for the trigger button */
+  className?: string;
+  /** Disable the combobox */
+  disabled?: boolean;
+  /** Optional callback fired when the selected value changes */
+  onValueChange?: (value: string) => void;
+}
+
+const InputDialogCombobox = React.forwardRef<HTMLButtonElement, InputDialogComboboxProps>(
+  (
+    { data = [], placeholder = 'Select item...', className, disabled, onValueChange },
+    ref
+  ) => {
+    const context = useContext(InputDialogContext);
+    if (!context) {
+      throw new Error('InputDialog.Combobox must be used within an InputDialog');
+    }
+
+    const { value, setValue } = context;
+    const [open, setOpen] = React.useState(false);
+    const [query, setQuery] = React.useState('');
+
+    const trimmedQuery = query.trim();
+    const selectedLabel =
+      (value && data.find(item => item.value === value)?.label) || value || placeholder;
+
+    // Show a "Create" entry when the typed text does not exactly match an option
+    const showCreate =
+      trimmedQuery.length > 0 &&
+      !data.some(item => item.label.toLowerCase() === trimmedQuery.toLowerCase());
+
+    const handleSelect = (currentValue: string) => {
+      const newValue = currentValue === value ? '' : currentValue;
+      setValue(newValue);
+      onValueChange?.(newValue);
+      setOpen(false);
+    };
+
+    return (
+      <Popover
+        open={open}
+        onOpenChange={nextOpen => {
+          setOpen(nextOpen);
+          if (!nextOpen) {
+            setQuery('');
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            ref={ref}
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            disabled={disabled}
+            className={cn('w-full justify-between', className)}
+          >
+            {selectedLabel}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+          <Command
+            filter={(itemValue, search) => {
+              const item = data.find(d => d.value === itemValue);
+              // The "Create" item (typed query) is not in `data`, always keep it
+              if (!item) {
+                return 1;
+              }
+              return item.label.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+            }}
+          >
+            <CommandInput
+              placeholder={`Search ${placeholder.toLowerCase()}...`}
+              value={query}
+              onValueChange={setQuery}
+            />
+            <CommandEmpty>No {placeholder.toLowerCase()} found.</CommandEmpty>
+            <CommandList>
+              <CommandGroup>
+                {data.map(item => (
+                  <CommandItem
+                    key={item.value}
+                    value={item.value}
+                    onSelect={handleSelect}
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        value === item.value ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {item.label}
+                  </CommandItem>
+                ))}
+                {showCreate && (
+                  <CommandItem
+                    key="__create__"
+                    value={trimmedQuery}
+                    onSelect={() => handleSelect(trimmedQuery)}
+                  >
+                    Create &quot;{trimmedQuery}&quot;
+                  </CommandItem>
+                )}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  }
+);
+
+InputDialogCombobox.displayName = 'InputDialog.Combobox';
+
 export const InputDialog = Object.assign(InputDialogRoot, {
   Label: InputDialogLabel,
   Input: InputDialogInput,
+  Combobox: InputDialogCombobox,
   Field,
   Actions,
   ActionsSecondary,
