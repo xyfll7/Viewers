@@ -68,7 +68,7 @@ export default function ModeRoute({
 
   const runTimeHangingProtocolId = lowerCaseSearchParams.get('hangingprotocolid');
   const runTimeStageId = lowerCaseSearchParams.get('stageid');
-  const token = lowerCaseSearchParams.get('token');
+  const token = lowerCaseSearchParams.get('token') || localStorage.getItem('authToken');
 
   if (token) {
     updateAuthServiceAndCleanUrl(token, location, userAuthenticationService);

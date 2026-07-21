@@ -21,6 +21,9 @@ export function updateAuthServiceAndCleanUrl(
     }),
   });
 
+  // Persist token to localStorage so it survives page refreshes
+  localStorage.setItem('authToken', token);
+
   // Create a URL object with the current location
   const urlObj = new URL(window.location.origin + window.location.pathname + location.search);
 
