@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { utils } from '@ohif/core';
 import { ImageViewerProvider, DragAndDropProvider } from '@ohif/ui-next';
 import { useSearchParams } from '../../hooks';
-import { useAppConfig } from '@state';
+import { useAppConfig, useDicomConfig } from '@state';
 import ViewportGrid from '@components/ViewportGrid';
 import Compose from './Compose';
 import loadModules from '../../pluginImports';
@@ -22,6 +22,7 @@ export default function ModeRoute({
   hotkeysManager,
 }: withAppTypes) {
   const [appConfig] = useAppConfig();
+  const [, setDicomConfig] = useDicomConfig();
 
   // Parse route params/querystring
   const location = useLocation();
@@ -90,9 +91,16 @@ export default function ModeRoute({
 
       fetch(`http://192.168.50.211:8080/v2/tasks/mark-conf?${params.toString()}`, {
         headers: token ? { 'access-key': token } : {},
-      }).catch(err => {
-        console.warn('mark-conf API call failed:', err);
-      });
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data?.data?.dicom_config) {
+            setDicomConfig(data.data.dicom_config);
+          }
+        })
+        .catch(err => {
+          console.warn('mark-conf API call failed:', err);
+        });
     }
   }, []);
 

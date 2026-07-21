@@ -30,7 +30,7 @@ import {
 } from '@ohif/ui-next';
 // Viewer Project
 // TODO: Should this influence study list?
-import { AppConfigProvider } from '@state';
+import { AppConfigProvider, DicomConfigProvider } from '@state';
 import createRoutes from './routes';
 import appInit from './appInit.js';
 import OpenIdConnectRoutes from './utils/OpenIdConnectRoutes';
@@ -115,6 +115,7 @@ function App({
 
   const providers = [
     [AppConfigProvider, { value: appConfigState }],
+    [DicomConfigProvider],
     [UserAuthenticationProvider, { service: userAuthenticationService }],
     [I18nextProvider, { i18n }],
     [ThemeWrapperNext],
