@@ -74,6 +74,28 @@ export default function ModeRoute({
     updateAuthServiceAndCleanUrl(token, location, userAuthenticationService);
   }
 
+  // Call mark-conf API on page load
+  useEffect(() => {
+    const taskId = lowerCaseSearchParams.get('id');
+    const taskStatus = lowerCaseSearchParams.get('status');
+    const taskWorkType = lowerCaseSearchParams.get('work_type');
+    const taskAccess = lowerCaseSearchParams.get('access');
+
+    if (taskId && taskStatus) {
+      const params = new URLSearchParams();
+      if (taskStatus) params.set('status', taskStatus);
+      if (taskId) params.set('task_id', taskId);
+      if (taskWorkType) params.set('work_type', taskWorkType);
+      if (taskAccess) params.set('access', taskAccess);
+
+      fetch(`http://192.168.50.211:8080/v2/tasks/mark-conf?${params.toString()}`, {
+        headers: token ? { 'access-key': token } : {},
+      }).catch(err => {
+        console.warn('mark-conf API call failed:', err);
+      });
+    }
+  }, []);
+
   // An undefined dataSourceName implies that the active data source that is already set in the ExtensionManager should be used.
   if (dataSourceName !== undefined) {
     extensionManager.setActiveDataSource(dataSourceName);
