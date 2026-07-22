@@ -8,6 +8,7 @@ import {
   ToolButtonListDivider,
 } from '@ohif/ui-next';
 import { useToolbar } from '@ohif/core/src';
+import { useCheckedMeasurementTools } from '@state';
 
 interface ToolButtonListWrapperProps {
   buttonSection: string;
@@ -30,11 +31,31 @@ export default function ToolButtonListWrapper({ buttonSection, id }: ToolButtonL
     return null;
   }
 
-  const primary =
-    toolbarButtons.find(button => button.componentProps.isActive)?.componentProps ||
-    toolbarButtons[0].componentProps;
+  // For the MeasurementTools and MoreTools sections, keep only the tools that
+  // are enabled (ischecked) in the dicomConfig for the current mode. The
+  // useCheckedMeasurementTools hook returns the set of checked tool names across
+  // every group (MeasurementTools + MoreTools + ...), so the same set works for
+  // both sections. Other sections are rendered as-is. The hook gracefully
+  // returns the full list when no config / no matching mode is available, so
+  // filtering is a no-op until dicomConfig is loaded.
+  const toolIds = React.useMemo(() => toolbarButtons.map(button => button.id), [toolbarButtons]);
+  const checkedToolIds = useCheckedMeasurementTools(toolIds);
+  const checkedToolSet = React.useMemo(() => new Set(checkedToolIds), [checkedToolIds]);
 
-  const items = toolbarButtons.map(button => button.componentProps);
+  const visibleToolbarButtons =
+    buttonSection === 'MeasurementTools' || buttonSection === 'MoreTools'
+      ? toolbarButtons.filter(button => checkedToolSet.has(button.id))
+      : toolbarButtons;
+
+  if (!visibleToolbarButtons.length) {
+    return null;
+  }
+
+  const primary =
+    visibleToolbarButtons.find(button => button.componentProps.isActive)?.componentProps ||
+    visibleToolbarButtons[0].componentProps;
+
+  const items = visibleToolbarButtons.map(button => button.componentProps);
 
   return (
     <ToolButtonList>
@@ -57,16 +78,24 @@ export default function ToolButtonListWrapper({ buttonSection, id }: ToolButtonL
       <div data-cy={`${id}-split-button-secondary`}>
         <ToolButtonListDropDown>
           {items.map(item => {
+            // `componentProps` contains internal-only flags (e.g. `visible`,
+            // `commands`, `isActive`) that must NOT be forwarded to the DOM.
+            // Only pass the props ToolButtonListItem understands plus data-* attrs.
+            const { id: itemId, icon, label, tooltip, disabled, disabledText } = item;
+
             return (
               <ToolButtonListItem
-                key={item.id}
-                {...item}
-                data-cy={item.id}
-                data-tool={item.id}
+                key={itemId}
+                icon={icon}
+                disabled={disabled}
+                disabledText={disabledText}
+                tooltip={tooltip}
+                data-cy={itemId}
+                data-tool={itemId}
                 data-active={item.isActive}
-                onSelect={() => onInteraction?.({ id, itemId: item.id, commands: item.commands })}
+                onSelect={() => onInteraction?.({ id, itemId, commands: item.commands })}
               >
-                <span className="pl-1">{item.label || item.tooltip || item.id}</span>
+                <span className="pl-1">{label || tooltip || itemId}</span>
               </ToolButtonListItem>
             );
           })}
