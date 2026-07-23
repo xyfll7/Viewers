@@ -85,7 +85,7 @@ function Header({
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
             {PatientInfo}
             <div className="border-primary-dark mx-1.5 h-[25px] border-r"></div>
-            <div className="flex-shrink-0">
+            {/* <div className="flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -118,7 +118,7 @@ function Header({
                   })}
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </div> */}
           </div>
         </div>
       </NavBar>
