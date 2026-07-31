@@ -10,6 +10,7 @@ import Compose from './Compose';
 import loadModules from '../../pluginImports';
 import { defaultRouteInit } from './defaultRouteInit';
 import { updateAuthServiceAndCleanUrl } from './updateAuthServiceAndCleanUrl';
+import { markConf } from '@utils/taskApi';
 
 const { getSplitParam } = utils;
 
@@ -83,16 +84,15 @@ export default function ModeRoute({
     const taskAccess = lowerCaseSearchParams.get('access');
 
     if (taskId && taskStatus) {
-      const params = new URLSearchParams();
-      if (taskStatus) params.set('status', taskStatus);
-      if (taskId) params.set('task_id', taskId);
-      if (taskWorkType) params.set('work_type', taskWorkType);
-      if (taskAccess) params.set('access', taskAccess);
-
-      fetch(`http://192.168.50.211:8080/v2/tasks/mark-conf?${params.toString()}`, {
-        headers: token ? { 'access-key': token } : {},
-      })
-        .then(res => res.json())
+      markConf(
+        {
+          taskId,
+          taskStatus,
+          taskWorkType,
+          taskAccess,
+        },
+        token
+      )
         .then(data => {
           if (data?.data?.dicom_config) {
             setDicomConfig(data.data.dicom_config);
