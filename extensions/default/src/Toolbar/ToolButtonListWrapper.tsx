@@ -32,12 +32,12 @@ export default function ToolButtonListWrapper({ buttonSection, id }: ToolButtonL
   }
 
   // For the MeasurementTools and MoreTools sections, keep only the tools that
-  // are enabled (ischecked) in the dicomConfig for the current mode. The
-  // useCheckedMeasurementTools hook returns the set of checked tool names across
+  // are enabled (ischecked) in the projectConfig.dicom_config for the current mode.
+  // The useCheckedMeasurementTools hook returns the set of checked tool names across
   // every group (MeasurementTools + MoreTools + ...), so the same set works for
   // both sections. Other sections are rendered as-is. The hook gracefully
   // returns the full list when no config / no matching mode is available, so
-  // filtering is a no-op until dicomConfig is loaded.
+  // filtering is a no-op until projectConfig is loaded.
   const toolIds = React.useMemo(() => toolbarButtons.map(button => button.id), [toolbarButtons]);
   const checkedToolIds = useCheckedMeasurementTools(toolIds);
   const checkedToolSet = React.useMemo(() => new Set(checkedToolIds), [checkedToolIds]);

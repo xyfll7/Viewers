@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { InputDialog } from '@ohif/ui-next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ohif/ui-next';
 import { useSystem } from '@ohif/core';
-import { useDicomConfig } from '@state';
+import { useProjectConfig } from '@state';
 
 type DataSource = {
   value: string;
@@ -34,11 +34,8 @@ function ReportDialog({
   onCancel,
 }: ReportDialogProps) {
   const { servicesManager } = useSystem();
-  const dicomConfigState = useDicomConfig() as unknown as [
-    { report_name_labels?: Array<{ code: string; text: string; color: string }> } | null,
-    (value: unknown) => void,
-  ];
-  const reportNameOptions = (dicomConfigState?.[0]?.report_name_labels ?? []).map(label => ({
+  const [projectConfig] = useProjectConfig();
+  const reportNameOptions = (projectConfig?.dicom_config?.report_name_labels ?? []).map(label => ({
     value: label.text,
     label: label.text,
   }));

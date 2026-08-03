@@ -1,28 +1,6 @@
 import React, { useState, createContext, useContext } from 'react';
 import PropTypes from 'prop-types';
 
-type DicomConfigContextValue = [
-  DicomConfig | null,
-  React.Dispatch<React.SetStateAction<DicomConfig | null>>,
-];
-
-const dicomConfigContext = createContext<DicomConfigContextValue | null>(null);
-const { Provider } = dicomConfigContext;
-
-export const useDicomConfig = () => useContext(dicomConfigContext);
-
-export function DicomConfigProvider({ children }: { children: React.ReactNode }) {
-  const [dicomConfig, setDicomConfig] = useState<DicomConfig | null>(null);
-
-  return <Provider value={[dicomConfig, setDicomConfig]}>{children}</Provider>;
-}
-
-DicomConfigProvider.propTypes = {
-  children: PropTypes.any,
-};
-
-export default DicomConfigProvider;
-
 export interface DicomToolConfig {
   toolName: string;
   ischecked: boolean;
@@ -44,11 +22,39 @@ export interface DicomModeConfig {
   tools: DicomToolGroups;
 }
 
-export interface DicomConfig {
-  report_name_labels?: { code: string; text: string; color: string }[];
-  measurement_labels?: { code: string; text: string; color: string }[];
-  mode_catalog?: DicomModeConfig[];
+/**
+ * The top-level project configuration returned by the backend. The DICOM
+ * related configuration lives under `dicom_config`.
+ */
+export interface ProjectConfig {
+  dicom_config?: {
+    report_name_labels?: { code: string; text: string; color: string }[];
+    measurement_labels?: { code: string; text: string; color: string }[];
+    mode_catalog?: DicomModeConfig[];
+  };
 }
+
+type ProjectConfigContextValue = [
+  ProjectConfig | null,
+  React.Dispatch<React.SetStateAction<ProjectConfig | null>>,
+];
+
+const projectConfigContext = createContext<ProjectConfigContextValue | null>(null);
+const { Provider } = projectConfigContext;
+
+export const useProjectConfig = () => useContext(projectConfigContext);
+
+export function ProjectConfigProvider({ children }: { children: React.ReactNode }) {
+  const [projectConfig, setProjectConfig] = useState<ProjectConfig | null>(null);
+
+  return <Provider value={[projectConfig, setProjectConfig]}>{children}</Provider>;
+}
+
+ProjectConfigProvider.propTypes = {
+  children: PropTypes.any,
+};
+
+export default ProjectConfigProvider;
 
 /**
  * Derives the route name from the browser address bar, e.g.
@@ -68,9 +74,10 @@ function getRouteNameFromUrl(): string {
  * read from the browser address bar.
  */
 export function getCheckedToolNames(
-  dicomConfig: DicomConfig | null,
+  projectConfig: ProjectConfig | null,
   routeName = getRouteNameFromUrl()
 ): Set<string> {
+  const dicomConfig = projectConfig?.dicom_config ?? null;
   const mode = dicomConfig?.mode_catalog?.find(m => m.routeName === routeName);
 
   if (!mode) {
@@ -89,7 +96,7 @@ export function getCheckedToolNames(
 }
 
 /**
- * Hook variant: reads the dicomConfig from context and returns the filtered
+ * Hook variant: reads the projectConfig from context and returns the filtered
  * list of measurement tool names for the given route (defaults to 'viewer').
  * When no config / no matching mode is available, the original list is
  * returned untouched.
@@ -98,12 +105,12 @@ export function useCheckedMeasurementTools(
   measurementTools: string[],
   routeName = getRouteNameFromUrl()
 ): string[] {
-  const [dicomConfig] = (useDicomConfig() as unknown) as [
-    DicomConfig | null,
+  const [projectConfig] = (useProjectConfig() as unknown) as [
+    ProjectConfig | null,
     (value: unknown) => void,
   ];
 
-  const checkedToolNames = getCheckedToolNames(dicomConfig, routeName);
+  const checkedToolNames = getCheckedToolNames(projectConfig, routeName);
 
   if (checkedToolNames.size === 0) {
     return measurementTools;

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { utils } from '@ohif/core';
 import { ImageViewerProvider, DragAndDropProvider } from '@ohif/ui-next';
 import { useSearchParams } from '../../hooks';
-import { useAppConfig, useDicomConfig } from '@state';
+import { useAppConfig, useProjectConfig } from '@state';
 import ViewportGrid from '@components/ViewportGrid';
 import Compose from './Compose';
 import loadModules from '../../pluginImports';
@@ -23,7 +23,7 @@ export default function ModeRoute({
   hotkeysManager,
 }: withAppTypes) {
   const [appConfig] = useAppConfig();
-  const [, setDicomConfig] = useDicomConfig();
+  const [, setProjectConfig] = useProjectConfig();
 
   // Parse route params/querystring
   const location = useLocation();
@@ -84,18 +84,15 @@ export default function ModeRoute({
     const taskAccess = lowerCaseSearchParams.get('access');
 
     if (taskId && taskStatus) {
-      markConf(
-        {
-          taskId,
-          taskStatus,
-          taskWorkType,
-          taskAccess,
-        },
-        token
-      )
+      markConf({
+        taskId,
+        taskStatus,
+        taskWorkType,
+        taskAccess,
+      })
         .then(data => {
-          if (data?.data?.dicom_config) {
-            setDicomConfig(data.data.dicom_config);
+          if (data?.data) {
+            setProjectConfig(data.data);
           }
         })
         .catch(err => {

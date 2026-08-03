@@ -1,14 +1,14 @@
 import { AppConfigProvider, useAppConfig } from './appConfig.tsx';
 import {
-  DicomConfigProvider,
-  useDicomConfig,
+  ProjectConfigProvider,
+  useProjectConfig,
   useCheckedMeasurementTools,
-} from './dicomConfig.tsx';
+} from './projectConfig.tsx';
 
 export {
   AppConfigProvider,
   useAppConfig,
-  DicomConfigProvider,
-  useDicomConfig,
+  ProjectConfigProvider,
+  useProjectConfig,
   useCheckedMeasurementTools,
 };

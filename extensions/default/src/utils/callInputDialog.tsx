@@ -3,7 +3,7 @@ import { setAnnotationLabel } from '@cornerstonejs/tools/utilities';
 import { annotation } from '@cornerstonejs/tools';
 import { LabellingFlow } from '@ohif/ui-next';
 import { InputDialog } from '@ohif/ui-next';
-import { useDicomConfig } from '@state';
+import { useProjectConfig } from '@state';
 
 interface InputDialogDefaultProps {
   hide: () => void;
@@ -20,13 +20,8 @@ function InputDialogDefault({
   defaultValue = '',
   submitOnEnter,
 }: InputDialogDefaultProps) {
-  const dicomConfigState = useDicomConfig() as unknown as [
-    {
-      measurement_labels?: Array<{ code: string; text: string; color: string }>;
-    } | null,
-    (value: unknown) => void,
-  ];
-  const measurementOptions = (dicomConfigState?.[0]?.measurement_labels ?? []).map(label => ({
+  const [projectConfig] = useProjectConfig();
+  const measurementOptions = (projectConfig?.dicom_config?.measurement_labels ?? []).map(label => ({
     value: label.text,
     label: label.text,
   }));
