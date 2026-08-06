@@ -32,6 +32,16 @@ export interface ProjectConfig {
     measurement_labels?: { code: string; text: string; color: string }[];
     mode_catalog?: DicomModeConfig[];
   };
+  /** 数据包 ID（来自 mark-conf） */
+  package_id?: string;
+  /** 任务批次 key（来自 mark-conf） */
+  task_key?: string;
+  /** 标注/作业类型（来自 mark-conf） */
+  work_type?: number;
+  /** 访问角色（来自 mark-conf） */
+  access?: number;
+  /** 抽检包 ID（来自 mark-conf / 入口 URL） */
+  spot_check_pack_id?: string;
 }
 
 type ProjectConfigContextValue = [
@@ -39,7 +49,7 @@ type ProjectConfigContextValue = [
   React.Dispatch<React.SetStateAction<ProjectConfig | null>>,
 ];
 
-const projectConfigContext = createContext<ProjectConfigContextValue | null>(null);
+const projectConfigContext = createContext<ProjectConfigContextValue>([null, () => {}]);
 const { Provider } = projectConfigContext;
 
 export const useProjectConfig = () => useContext(projectConfigContext);
@@ -62,8 +72,7 @@ export default ProjectConfigProvider;
  * Falls back to 'viewer' when no path segment is available.
  */
 function getRouteNameFromUrl(): string {
-  const path =
-    typeof window !== 'undefined' ? window.location.pathname : '';
+  const path = typeof window !== 'undefined' ? window.location.pathname : '';
   const segments = path.split('/').filter(Boolean);
   return segments[0] || 'viewer';
 }
@@ -105,7 +114,7 @@ export function useCheckedMeasurementTools(
   measurementTools: string[],
   routeName = getRouteNameFromUrl()
 ): string[] {
-  const [projectConfig] = (useProjectConfig() as unknown) as [
+  const [projectConfig] = useProjectConfig() as unknown as [
     ProjectConfig | null,
     (value: unknown) => void,
   ];
