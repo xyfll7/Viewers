@@ -10,6 +10,12 @@ CONTAINER_NAME := ohif-taoding
 
 .PHONY: tab build docker-build docker-run docker-up docker-stop
 
+## 构建 taoding 前端（执行 platform/app 的 build:taoding），压缩 dist 并打开 Finder
+build:
+	cd platform/app && yarn run build:taoding
+	cd platform/app && rm -f dist.zip && zip -r dist.zip dist
+	open -R $(ROOT_DIR)/platform/app/dist.zip
+
 ## 在现有 Terminal 窗口中新建一个 tab 标签，并 cd 到 Viewers 目录
 tab:
 	@osascript \
